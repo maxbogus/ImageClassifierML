@@ -117,19 +117,19 @@ def predict(image_path, model, topk=5):
     img = torch.from_numpy(img)
 
     model.eval()
-    inputs = Variable(img).to(device)
+    inputs = Variable(img).to(DEVICE)
     logits = model.forward(inputs)
 
-    ps = F.softmax(logits,dim=1)
-    topk = ps.cpu().topk(topk)
+    APPLIED_SOFTMAX = F.softmax(logits, dim=1)
+    topk = APPLIED_SOFTMAX.cpu().topk(topk)
 
     return (e.data.numpy().squeeze().tolist() for e in topk)
 
 model = load_checkpoint(CHECKPOINT)
 
-probs, classes = predict(IMAGE, model)
-class_names = TRAIN_DATA.classes
-labels = [CAT_TO_NAME[class_names[e]] for e in classes]
-y_pos = np.arange(len(probs))
+PROBS, PREDICTED_CLASSES = predict(IMAGE, model)
+CLASS_NAMES = TRAIN_DATA.classes
+LABELS = [CAT_TO_NAME[CLASS_NAMES[e]] for e in PREDICTED_CLASSES]
+y_pos = np.arange(len(PROBS))
 
-print(labels, y_pos, class_names, probs, classes)
+print(LABELS, y_pos, CLASS_NAMES, PROBS, PREDICTED_CLASSES)

@@ -58,7 +58,7 @@ def load_checkpoint(filepath):
     Load saved checkpoint
     """
     checkpoint = torch.load(filepath)
-    models.densenet121(pretrained=True)
+    MODEL = models.densenet121(pretrained=True)
     MODEL.classifier = nn.Sequential(
         nn.Linear(1024, 256),
         nn.ReLU(),
@@ -133,4 +133,6 @@ CLASS_NAMES = TRAIN_DATA.classes
 LABELS = [CAT_TO_NAME[CLASS_NAMES[e]] for e in PREDICTED_CLASSES]
 Y_POS = np.arange(len(PROBS))
 
-print(LABELS, Y_POS, CLASS_NAMES, PROBS, PREDICTED_CLASSES)
+# print(LABELS, Y_POS, CLASS_NAMES, PROBS, PREDICTED_CLASSES)
+for i in range(len(PREDICTED_CLASSES)):
+    print(CAT_TO_NAME[CLASS_NAMES[PREDICTED_CLASSES[i]]], PROBS[i])

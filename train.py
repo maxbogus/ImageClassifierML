@@ -1,41 +1,39 @@
 # Imports here
 import argparse
-import matplotlib.pyplot as plt
 
 import torch
+from sys import exit
 from torch import nn
 from torch import optim
-import torch.nn.functional as F
-from torchvision import datasets, transforms, models
-from PIL import Image
-import numpy as np
 from torch.autograd import Variable
 
+from torchvision import datasets, transforms, models
+
 # parse args
-parser = argparse.ArgumentParser(description='Parse arguments.')
-parser.add_argument("--model", type=int, default=1)
-parser.add_argument("--learning-rate", type=float, defalut=0.003)
-parser.add_argument("--hidden-units")
-parser.add_argument("--epochs", type=int, default=1)
-parser.add_argument("--use-gpu", type=bool, default=False)
+PARSER = argparse.ArgumentParser(description='Parse arguments.')
+PARSER.add_argument("--model", type=int, default=1)
+PARSER.add_argument("--learning-rate", type=float, defalut=0.003)
+PARSER.add_argument("--hidden-units")
+PARSER.add_argument("--epochs", type=int, default=1)
+PARSER.add_argument("--use-gpu", type=bool, default=False)
 
-args = parser.parse_args()
+ARGS = PARSER.parse_args()
 
-models = args.model
-learningRate = args.learningRate
-hiddenUnits = args.hiddenUnits
-epochs = args.epochs
-useGpu = args.useGpu
+SELECTED_MODEL = ARGS.model
+LEARNING_RATE = ARGS.learningRate
+HIDDEN_UNITS = ARGS.hiddenUnits
+EPOCHS = ARGS.epochs
+USE_GPU = ARGS.useGpu
 
 data_dir = 'flowers'
 train_dir = data_dir + '/train'
 valid_dir = data_dir + '/valid'
 test_dir = data_dir + '/test'
 
-if useGpu:
-   if torch.cuda.is_available() == False:
-       print('GPU is not supported')
-       exit
+if USE_GPU:
+    if torch.cuda.is_available() is not False:
+        print('GPU is not supported')
+        exit()
 
 train_transforms = transforms.Compose([transforms.RandomRotation(30),
                                        transforms.RandomResizedCrop(224),
@@ -66,14 +64,14 @@ testloader = torch.utils.data.DataLoader(test_data, batch_size=64)
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model = models.densenet121(pretrained=True)
-model
+PRETRAINED_MODEL = models.densenet121(pretrained=True)
+PRETRAINED_MODEL()
 
 # Freeze parameters so we don't backprop through them
-for param in model.parameters():
+for param in PRETRAINED_MODEL.parameters():
     param.requires_grad = False
     
-model.classifier = nn.Sequential(nn.Linear(1024, 256),
+PRETRAINED_MODEL.classifier = nn.Sequential(nn.Linear(1024, 256),
                                  nn.ReLU(),
                                  nn.Dropout(0.2),
                                  nn.Linear(256, 102),
@@ -82,16 +80,16 @@ model.classifier = nn.Sequential(nn.Linear(1024, 256),
 criterion = nn.NLLLoss()
 
 # Only train the classifier parameters, feature parameters are frozen
-optimizer = optim.Adam(model.classifier.parameters(), lr=0.003)
+optimizer = optim.Adam(PRETRAINED_MODEL.classifier.parameters(), lr=0.003)
 
-model.to(device);
+PRETRAINED_MODEL.to(device)
 
 # TODO: Do validation on the test set
-epochs = 1
+EPOCHS = 1
 steps = 0
 running_loss = 0
 print_every = 5
-for epoch in range(epochs):
+for epoch in range(EPOCHS):
     for inputs, labels in trainloader:
         steps += 1
         # Move input and label tensors to the default device
@@ -99,7 +97,7 @@ for epoch in range(epochs):
         
         optimizer.zero_grad()
         
-        logps = model.forward(inputs)
+        logps = PRETRAINED_MODEL.forward(inputs)
         loss = criterion(logps, labels)
         loss.backward()
         optimizer.step()
@@ -109,11 +107,11 @@ for epoch in range(epochs):
         if steps % print_every == 0:
             test_loss = 0
             accuracy = 0
-            model.eval()
+            PRETRAINED_MODEL.eval()
             with torch.no_grad():
                 for inputs, labels in testloader:
                     inputs, labels = inputs.to(device), labels.to(device)
-                    logps = model.forward(inputs)
+                    logps = PRETRAINED_MODEL.forward(inputs)
                     batch_loss = criterion(logps, labels)
                     
                     test_loss += batch_loss.item()
@@ -124,14 +122,14 @@ for epoch in range(epochs):
                     equals = top_class == labels.view(*top_class.shape)
                     accuracy += torch.mean(equals.type(torch.FloatTensor)).item()
                     
-            print(f"Epoch {epoch+1}/{epochs}.. "
+            print(f"Epoch {epoch+1}/{EPOCHS}.. "
                   f"Train loss: {running_loss/print_every:.3f}.. "
                   f"Test loss: {test_loss/len(testloader):.3f}.. "
                   f"Test accuracy: {accuracy/len(testloader):.3f}")
             running_loss = 0
-            model.train()
+            PRETRAINED_MODEL.train()
 
-checkpoint = {'model_state_dict': model.state_dict(),
+checkpoint = {'model_state_dict': PRETRAINED_MODEL.state_dict(),
             'optimizer_state_dict': optimizer.state_dict()}
 
 torch.save(checkpoint, 'checkpoint.pth')

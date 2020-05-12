@@ -7,22 +7,32 @@ import json
 from torch import nn
 from torch import optim
 import torch.nn.functional as F
-from torchvision import datasets, transforms, models
+from torchvision import datasets, transforms, SELECTED_MODEL
 from PIL import Image
 import numpy as np
 from torch.autograd import Variable
 
+# parse args
+parser = argparse.ArgumentParser(description='Parse arguments.')
+parser.add_argument("--image", type=str, default=1)
+parser.add_argument("--checkpoint", type=str, defalut=0.003)
+parser.add_argument("--jsonFile", type=str, default=0.01)
+parser.add_argument("--epochs", type=int, default=1)
+parser.add_argument("--use-gpu", type=bool, default=False)
+
+args = parser.parse_args()
+
 image = None
 checkpoint = None
 jsonFile = None
-useGpu = None
+USE_GPU = args.useGpu
 
 with open('cat_to_name.json', 'r') as f:
     cat_to_name = json.load(f)
 
 def load_checkpoint(filepath):
     checkpoint = torch.load(filepath)
-    models.densenet121(pretrained=True)
+    SELECTED_MODEL.densenet121(pretrained=True)
     model.classifier = nn.Sequential(nn.Linear(1024, 256),
                                  nn.ReLU(),
                                  nn.Dropout(0.2),

@@ -14,18 +14,18 @@ from torchvision import datasets, transforms, models
 # parse args
 PARSER = argparse.ArgumentParser(description='Parse arguments.')
 PARSER.add_argument("--model", type=int, default=1)
-PARSER.add_argument("--learning-rate", type=float, defalut=0.003)
-PARSER.add_argument("--hidden-units")
+PARSER.add_argument("--rate", type=float, default=0.003)
+PARSER.add_argument("--units", type=int, default=256)
 PARSER.add_argument("--epochs", type=int, default=1)
-PARSER.add_argument("--use-gpu", type=bool, default=False)
+PARSER.add_argument("--gpu", type=bool, default=False)
 
 ARGS = PARSER.parse_args()
 
 SELECTED_MODEL = ARGS.model
-LEARNING_RATE = ARGS.learningRate
-HIDDEN_UNITS = ARGS.hiddenUnits
+LEARNING_RATE = ARGS.rate
+HIDDEN_UNITS = ARGS.units
 EPOCHS = ARGS.epochs
-USE_GPU = ARGS.useGpu
+USE_GPU = ARGS.gpu
 
 DATA_DIR = 'flowers'
 TRAIN_DIR = DATA_DIR + '/train'
@@ -66,24 +66,23 @@ TEST_LOADER = torch.utils.data.DataLoader(TEST_DATA, batch_size=64)
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 PRETRAINED_MODEL = models.densenet121(pretrained=True)
-PRETRAINED_MODEL()
 
 # Freeze parameters so we don't backprop through them
 for param in PRETRAINED_MODEL.parameters():
     param.requires_grad = False
 
 PRETRAINED_MODEL.classifier = nn.Sequential(
-    nn.Linear(1024, 256),
+    nn.Linear(1024, LEARNING_RATE),
     nn.ReLU(),
     nn.Dropout(0.2),
-    nn.Linear(256, 102),
+    nn.Linear(LEARNING_RATE, 102),
     nn.LogSoftmax(dim=1)
     )
 
 CRITERION = nn.NLLLoss()
 
 # Only train the classifier parameters, feature parameters are frozen
-OPTIMIZER = optim.Adam(PRETRAINED_MODEL.classifier.parameters(), lr=0.003)
+OPTIMIZER = optim.Adam(PRETRAINED_MODEL.classifier.parameters(), lr=LEARNING_RATE)
 
 PRETRAINED_MODEL.to(DEVICE)
 

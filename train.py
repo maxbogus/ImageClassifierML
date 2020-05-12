@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+"""
+Module for model setup and training
+"""
 import argparse
 import sys
 
@@ -61,7 +64,6 @@ TRAIN_LOADER = torch.utils.data.DataLoader(TRAIN_DATA, batch_size=64, shuffle=Tr
 VALID_LOADER = torch.utils.data.DataLoader(VALID_DATA, batch_size=64)
 TEST_LOADER = torch.utils.data.DataLoader(TEST_DATA, batch_size=64)
 
-
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 PRETRAINED_MODEL = models.densenet121(pretrained=True)
 PRETRAINED_MODEL()
@@ -122,15 +124,15 @@ for epoch in range(EPOCHS):
                     accuracy += torch.mean(equals.type(torch.FloatTensor)).item()
 
             print(f"Epoch {EPOCHS+1}/{EPOCHS}.. "
-                  f"Train loss: {running_loss/print_every:.3f}.. "
-                  f"Test loss: {test_loss/len(testloader):.3f}.. "
-                  f"Test accuracy: {accuracy/len(testloader):.3f}")
+                  f"Train loss: {RUNNING_LOSS/PRINT_EVERY:.3f}.. "
+                  f"Test loss: {test_loss/len(TEST_LOADER):.3f}.. "
+                  f"Test accuracy: {accuracy/len(TEST_LOADER):.3f}")
             RUNNING_LOSS = 0
             PRETRAINED_MODEL.train()
 
-checkpoint = {
+CHECKPOINT = {
     'model_state_dict': PRETRAINED_MODEL.state_dict(),
     'optimizer_state_dict': OPTIMIZER.state_dict()
     }
 
-torch.save(checkpoint, 'checkpoint.pth')
+torch.save(CHECKPOINT, 'checkpoint.pth')

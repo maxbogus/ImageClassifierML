@@ -1,4 +1,7 @@
-# Imports here
+#!/usr/bin/env python
+"""
+Module for model load and making predictions
+"""
 import json
 import argparse
 import matplotlib.pyplot as plt

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import argparse
 import sys
 
@@ -127,7 +128,9 @@ for epoch in range(EPOCHS):
             RUNNING_LOSS = 0
             PRETRAINED_MODEL.train()
 
-checkpoint = {'model_state_dict': PRETRAINED_MODEL.state_dict(),
-            'optimizer_state_dict': OPTIMIZER.state_dict()}
+checkpoint = {
+    'model_state_dict': PRETRAINED_MODEL.state_dict(),
+    'optimizer_state_dict': OPTIMIZER.state_dict()
+    }
 
 torch.save(checkpoint, 'checkpoint.pth')

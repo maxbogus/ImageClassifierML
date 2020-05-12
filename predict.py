@@ -3,39 +3,61 @@
 Module for model load and making predictions
 """
 import json
+import sys
 import argparse
+
 import matplotlib.pyplot as plt
 
 import torch
 from torch import nn
 from torch import optim
 import torch.nn.functional as F
-from torchvision import datasets, transforms, SELECTED_MODEL
+from torch.autograd import Variable
+
+from torchvision import datasets, transforms, models
 from PIL import Image
 import numpy as np
-from torch.autograd import Variable
 
 # parse args
 PARSER = argparse.ArgumentParser(description='Parse arguments.')
-PARSER.add_argument("--image", type=str, default=1)
+PARSER.add_argument("--image", type=str, default='flowers/valid/102/image_08006.jpg')
 PARSER.add_argument("--checkpoint", type=str, defalut='checkpoint.pth')
-PARSER.add_argument("--jsonFile", type=str, default='cat_to_name.json')
+PARSER.add_argument("--json", type=str, default='cat_to_name.json')
 PARSER.add_argument("--epochs", type=int, default=1)
-PARSER.add_argument("--use-gpu", type=bool, default=False)
+PARSER.add_argument("--gpu", type=bool, default=False)
 
 ARGS = PARSER.parse_args()
 
-IMAGE = None
-CHECKPOINT = None
-JSON_FILE = None
-USE_GPU = ARGS.useGpu
+IMAGE = ARGS.image
+CHECKPOINT =ARGS.checkpoint
+JSON_FILE = ARGS.json
+USE_GPU = ARGS.gpu
 
-with open('cat_to_name.json', 'r') as f:
-    cat_to_name = json.load(f)
+if USE_GPU:
+    if torch.cuda.is_available() is not False:
+        print('GPU is not supported')
+        sys.exit()
+
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+TRAIN_TRANSFORMS = transforms.Compose(
+    [transforms.RandomRotation(30),
+     transforms.RandomResizedCrop(224),
+     transforms.RandomHorizontalFlip(),
+     transforms.ToTensor(),
+     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])])
+
+DATA_DIR = 'flowers'
+TRAIN_DIR = DATA_DIR + '/train'
+
+TRAIN_DATA = datasets.ImageFolder(TRAIN_DIR, transform=TRAIN_TRANSFORMS)
+
+with open(JSON_FILE, 'r') as f:
+    CAT_TO_NAME = json.load(f)
 
 def load_checkpoint(filepath):
     checkpoint = torch.load(filepath)
-    SELECTED_MODEL.densenet121(pretrained=True)
+    models.densenet121(pretrained=True)
     model.classifier = nn.Sequential(
         nn.Linear(1024, 256),
         nn.ReLU(),
@@ -103,11 +125,11 @@ def predict(image_path, model, topk=5):
 
     return (e.data.numpy().squeeze().tolist() for e in topk)
 
-model = load_checkpoint()
+model = load_checkpoint(CHECKPOINT)
 
-probs, classes = predict('flowers/valid/102/image_08006.jpg', model)
-class_names = train_data.classes
-labels = [cat_to_name[class_names[e]] for e in classes]
+probs, classes = predict(IMAGE, model)
+class_names = TRAIN_DATA.classes
+labels = [CAT_TO_NAME[class_names[e]] for e in classes]
 y_pos = np.arange(len(probs))
 
 print(labels, y_pos, class_names, probs, classes)

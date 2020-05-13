@@ -20,6 +20,7 @@ import numpy as np
 PARSER = argparse.ArgumentParser(description='Parse arguments.')
 PARSER.add_argument("--image", type=str, default='flowers/test/6/image_07182.jpg')
 PARSER.add_argument("--model", type=int, default=1)
+PARSER.add_argument("--data", type=str, default='flowers')
 PARSER.add_argument("--checkpoint", type=str, default='checkpoint.pth')
 PARSER.add_argument("--json", type=str, default='cat_to_name.json')
 PARSER.add_argument("--epochs", type=int, default=1)
@@ -32,6 +33,7 @@ SELECTED_MODEL = ARGS.model
 CHECKPOINT = ARGS.checkpoint
 JSON_FILE = ARGS.json
 USE_GPU = ARGS.gpu
+DATA_DIR = ARGS.data
 
 if USE_GPU:
     if torch.cuda.is_available() is not False:
@@ -47,7 +49,6 @@ TRAIN_TRANSFORMS = transforms.Compose(
      transforms.ToTensor(),
      transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])])
 
-DATA_DIR = 'flowers'
 TRAIN_DIR = DATA_DIR + '/train'
 
 TRAIN_DATA = datasets.ImageFolder(TRAIN_DIR, transform=TRAIN_TRANSFORMS)

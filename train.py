@@ -15,6 +15,7 @@ from torchvision import datasets, transforms, models
 PARSER = argparse.ArgumentParser(description='Parse arguments.')
 PARSER.add_argument("--model", type=int, default=1)
 PARSER.add_argument("--checkpoint", type=str, default='checkpoint.pth')
+PARSER.add_argument("--data", type=str, default='flowers')
 PARSER.add_argument("--rate", type=float, default=0.003)
 PARSER.add_argument("--units", type=int, default=256)
 PARSER.add_argument("--epochs", type=int, default=1)
@@ -27,9 +28,9 @@ LEARNING_RATE = ARGS.rate
 HIDDEN_UNITS = ARGS.units
 EPOCHS = ARGS.epochs
 USE_GPU = ARGS.gpu
+DATA_DIR = ARGS.data
 CHECKPOINT_FILE_NAME = ARGS.checkpoint
 
-DATA_DIR = 'flowers'
 TRAIN_DIR = DATA_DIR + '/train'
 VALID_DIR = DATA_DIR + '/valid'
 TEST_DIR = DATA_DIR + '/test'

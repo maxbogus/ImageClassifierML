@@ -14,6 +14,7 @@ from torchvision import datasets, transforms, models
 # parse args
 PARSER = argparse.ArgumentParser(description='Parse arguments.')
 PARSER.add_argument("--model", type=int, default=1)
+PARSER.add_argument("--checkpoint", type=str, default='checkpoint.pth')
 PARSER.add_argument("--rate", type=float, default=0.003)
 PARSER.add_argument("--units", type=int, default=256)
 PARSER.add_argument("--epochs", type=int, default=1)
@@ -26,6 +27,7 @@ LEARNING_RATE = ARGS.rate
 HIDDEN_UNITS = ARGS.units
 EPOCHS = ARGS.epochs
 USE_GPU = ARGS.gpu
+CHECKPOINT_FILE_NAME = ARGS.checkpoint
 
 DATA_DIR = 'flowers'
 TRAIN_DIR = DATA_DIR + '/train'
@@ -65,17 +67,20 @@ VALID_LOADER = torch.utils.data.DataLoader(VALID_DATA, batch_size=64)
 TEST_LOADER = torch.utils.data.DataLoader(TEST_DATA, batch_size=64)
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-PRETRAINED_MODEL = models.densenet121(pretrained=True)
+if SELECTED_MODEL == 1:
+    PRETRAINED_MODEL = models.densenet121(pretrained=True)
+else:
+    PRETRAINED_MODEL = models.densenet161(pretrained=True)
 
 # Freeze parameters so we don't backprop through them
 for param in PRETRAINED_MODEL.parameters():
     param.requires_grad = False
 
 PRETRAINED_MODEL.classifier = nn.Sequential(
-    nn.Linear(1024, LEARNING_RATE),
+    nn.Linear(1024, HIDDEN_UNITS),
     nn.ReLU(),
     nn.Dropout(0.2),
-    nn.Linear(LEARNING_RATE, 102),
+    nn.Linear(HIDDEN_UNITS, 102),
     nn.LogSoftmax(dim=1)
     )
 
@@ -134,4 +139,4 @@ CHECKPOINT = {
     'optimizer_state_dict': OPTIMIZER.state_dict()
     }
 
-torch.save(CHECKPOINT, 'checkpoint.pth')
+torch.save(CHECKPOINT, CHECKPOINT_FILE_NAME)

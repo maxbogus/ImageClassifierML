@@ -65,11 +65,13 @@ TEST_DATA = datasets.ImageFolder(TEST_DIR, transform=TEST_TRANSFORMS)
 TRAIN_LOADER = torch.utils.data.DataLoader(TRAIN_DATA, batch_size=64, shuffle=True)
 VALID_LOADER = torch.utils.data.DataLoader(VALID_DATA, batch_size=64)
 TEST_LOADER = torch.utils.data.DataLoader(TEST_DATA, batch_size=64)
+FEATURES = 1024
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 if SELECTED_MODEL == 1:
     PRETRAINED_MODEL = models.densenet121(pretrained=True)
 else:
+    FEATURES = 2208
     PRETRAINED_MODEL = models.densenet161(pretrained=True)
 
 # Freeze parameters so we don't backprop through them
@@ -77,7 +79,7 @@ for param in PRETRAINED_MODEL.parameters():
     param.requires_grad = False
 
 PRETRAINED_MODEL.classifier = nn.Sequential(
-    nn.Linear(1024, HIDDEN_UNITS),
+    nn.Linear(FEATURES, HIDDEN_UNITS),
     nn.ReLU(),
     nn.Dropout(0.2),
     nn.Linear(HIDDEN_UNITS, 102),

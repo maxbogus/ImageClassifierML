@@ -116,7 +116,7 @@ for epoch in range(EPOCHS):
             accuracy = 0
             PRETRAINED_MODEL.eval()
             with torch.no_grad():
-                for inputs, labels in TEST_LOADER:
+                for inputs, labels in VALID_DATA:
                     inputs, labels = inputs.to(DEVICE), labels.to(DEVICE)
                     logps = PRETRAINED_MODEL.forward(inputs)
                     batch_loss = CRITERION(logps, labels)
@@ -128,11 +128,27 @@ for epoch in range(EPOCHS):
                     top_p, top_class = ps.topk(1, dim=1)
                     equals = top_class == labels.view(*top_class.shape)
                     accuracy += torch.mean(equals.type(torch.FloatTensor)).item()
+                
+                total = 0
+                correct = 0 
+                count = 0
+                #iterating for each sample in the test dataset once
+                for inputs, labels in TEST_LOADER:
+                    inputs, labels = inputs.to(DEVICE), labels.to(DEVICE)
+                    
+                    #Calculate the class probabilities (softmax) for img
+                    logps = PRETRAINED_MODEL.forward(inputs)
+                    ps = torch.exp(logps)
+                    _, predicted = torch.max(logps.data,1)
+                    total += labels.size(0)
+                    correct += (predicted == labels).sum().item() 
+                    count += 1
+                    print("Accuracy of network on test images is ... {:.4f}....count: {}".format(100*correct/total,  count ))
 
             print(f"Epoch {EPOCHS+1}/{EPOCHS}.. "
                   f"Train loss: {RUNNING_LOSS/PRINT_EVERY:.3f}.. "
-                  f"Test loss: {test_loss/len(TEST_LOADER):.3f}.. "
-                  f"Test accuracy: {accuracy/len(TEST_LOADER):.3f}")
+                  f"Test loss: {test_loss/len(VALID_DATA):.3f}.. "
+                  f"Test accuracy: {accuracy/len(VALID_DATA):.3f}")
             RUNNING_LOSS = 0
             PRETRAINED_MODEL.train()
 

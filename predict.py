@@ -18,7 +18,8 @@ import numpy as np
 
 # parse args
 PARSER = argparse.ArgumentParser(description='Parse arguments.')
-PARSER.add_argument("--image", type=str, default='flowers/valid/102/image_08006.jpg')
+PARSER.add_argument("--image", type=str, default='flowers/test/6/image_07182.jpg')
+PARSER.add_argument("--model", type=int, default=1)
 PARSER.add_argument("--checkpoint", type=str, default='checkpoint.pth')
 PARSER.add_argument("--json", type=str, default='cat_to_name.json')
 PARSER.add_argument("--epochs", type=int, default=1)
@@ -27,7 +28,8 @@ PARSER.add_argument("--gpu", type=bool, default=False)
 ARGS = PARSER.parse_args()
 
 IMAGE = ARGS.image
-CHECKPOINT =ARGS.checkpoint
+SELECTED_MODEL = ARGS.model
+CHECKPOINT = ARGS.checkpoint
 JSON_FILE = ARGS.json
 USE_GPU = ARGS.gpu
 

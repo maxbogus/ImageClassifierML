@@ -128,22 +128,22 @@ for epoch in range(EPOCHS):
                     top_p, top_class = ps.topk(1, dim=1)
                     equals = top_class == labels.view(*top_class.shape)
                     accuracy += torch.mean(equals.type(torch.FloatTensor)).item()
-                
+
                 total = 0
-                correct = 0 
+                correct = 0
                 count = 0
                 #iterating for each sample in the test dataset once
                 for inputs, labels in TEST_LOADER:
                     inputs, labels = inputs.to(DEVICE), labels.to(DEVICE)
-                    
+
                     #Calculate the class probabilities (softmax) for img
                     logps = PRETRAINED_MODEL.forward(inputs)
                     ps = torch.exp(logps)
-                    _, predicted = torch.max(logps.data,1)
+                    _, predicted = torch.max(logps.data, 1)
                     total += labels.size(0)
-                    correct += (predicted == labels).sum().item() 
+                    correct += (predicted == labels).sum().item()
                     count += 1
-                    print("Accuracy of network on test images is ... {:.4f}....count: {}".format(100*correct/total,  count ))
+                    print("Accuracy of network on test images is ... {:.4f}....count: {}".format(100*correct/total, count))
 
             print(f"Epoch {EPOCHS+1}/{EPOCHS}.. "
                   f"Train loss: {RUNNING_LOSS/PRINT_EVERY:.3f}.. "
